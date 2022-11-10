@@ -53,72 +53,69 @@ class employee:
         self.info[8] = contact
 
     def show(self):
-        #employeeID= str(self.info[0])
         employeeTxt = ','.join(str(x) for x in self.info)
-        #for i in range(8):
-            #employeeText =+ ',' + str(self.info[i+1])
-            #print(employeeTxt)
         return employeeTxt
 
     def getID(self):
-        return self.id
+        return self.info[0]
 
     def getPassword(self):
-        return self.password
+        return self.info[1]
 
     def getFirstName(self):
-        return self.firstName
+        return self.info[2]
 
     def getLastName(self):
-        return self.lastName
+        return self.info[3]
 
     def getOccupation(self):
-        return self.occupation
+        return self.info[4]
 
     def getLevel(self):
-        return self.level
+        return self.info[5]
 
     def getPastExperience(self):
-        return self.pastExperience
+        return self.info[6]
 
     def getTimeInPos(self):
-        return self.timeInPos
+        return self.info[7]
 
     def getContactInfo(self):
-        return self.contactInfo
+        return self.info[8]
 
     def getNotes(self):
-        return self.notes
+        return self.info[9]
 
     def setID(self,id):
-        self.id = id
+        self.info[0] = id
 
     def setPassword(self, passW):
-        self.password = passW
+        self.info[1] = passW
 
     def setFirstName(self, fName):
-        self.firstName = fName
+        self.info[2] = fName
 
     def setLastName(self,lName):
-        self.lastName = lName
+        self.info[3] = lName
 
     def setOccupation(self, occ):
-        self.occupation = occ
+        self.info[4] = occ
 
     def setLevel(self,level):
-        self.level = level
+        self.info[5] = level
 
     def setPastExperience(self,pastXP):
-        self.pastExperience = pastXP
+        self.info[6] = pastXP
 
     def setTimeInPos(self,xp):
-        self.timeInPos = xp
+        self.info[7] = xp
 
     def setContactInfo(self,contact):
-        self.contactInfo = contact
+        self.info[8] = contact
 
     def addNote(self,note):
-        self.notes = note
+        #self.info[9].append(note)
+        print(type(self.info[9]))
 
 
 class system:
@@ -142,7 +139,7 @@ class system:
                         data = emp.split(',')
                         if len(data) == 10:
                             newEmp = employee(data[0], data[1], data[2], data[3], data[4],
-                                data[5], data[6], data[7], data[8], data[9])
+                                data[5], data[6], data[7], data[8], list(data[9].split(',')))
                             self.employees.append(newEmp)
 
     #def checkAccess(self):
@@ -163,12 +160,10 @@ class system:
 
         lbox = tk.Listbox(canvas, selectmode=tk.SINGLE)
         lbox.pack()
-        for i in range(len(self.employees)): #adapt to gui
-            #empframe = tk.Frame(canvas, borderwidth=10)
-            #empframe.pack()
-            #L = tk.Label(empframe, text= emp.show())
-            #L.pack()
+
+        for i in range(len(self.employees)):
             lbox.insert(i, self.employees[i].show())
+
         empframe = tk.Frame(canvas, borderwidth=10)
         empframe.pack()
         delete = tk.Button(empframe, text="Delete", state= 'disabled', padx=10,pady=5, bg="gray",
@@ -178,17 +173,27 @@ class system:
         command = lambda: self.updateEmployee(lbox.curselection()[0]))
         update.pack(side = "right")
         addNote = tk.Button(empframe, text="Add Note",state= 'disabled', padx=10,pady=5, bg="gray",
-        command = lambda: self.updateEmployee(lbox.curselection()[0]))
+        command = lambda: self.newNote(lbox.curselection()[0]))
         addNote.pack(side = "right")
 
         def enable(self):
             delete['state'] = 'normal'
             update['state'] = 'normal'
             addNote['state'] = 'normal'
-
         lbox.bind('<<ListboxSelect>>', enable)
 
+    def newNote(self, index):
+        noteWindow = tk.Tk()
 
+        noteToAdd = tk.Entry(noteWindow, bd =5,)
+        noteToAdd.pack()
+        def noteHelper():
+            self.employees[index].addNote(noteToAdd.get())
+            self.showEmployees()
+            noteWindow.destroy()
+        add = tk.Button(noteWindow, text="Save Note", bd=5, command= noteHelper)
+        add.pack()
+        noteWindow.mainloop()
 
     def addEmployee(self):
         addEmp = tk.Tk()
@@ -249,39 +254,58 @@ class system:
 
     def updateEmployee(self,index):
         addEmp = tk.Tk()
-        addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
-        canvas.pack()
-        
+        #addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
+        #Canvas.pack()
+
         password = tk.Entry(addEmp, bd =5,)
         password.pack()
+        password.insert(0, self.employees[index].getPassword())
 
         fName = tk.Entry(addEmp, bd =5)
         fName.pack()
+        fName.insert(0, self.employees[index].getFirstName())
 
         lName = tk.Entry(addEmp, bd =5)
         lName.pack()
+        lName.insert(0, self.employees[index].getLastName())
 
         occ = tk.Entry(addEmp, bd =5)
         occ.pack()
+        occ.insert(0, self.employees[index].getOccupation())
 
         lvl = tk.Entry(addEmp, bd =5)
         lvl.pack()
+        lvl.insert(0, self.employees[index].getLevel())
 
         past = tk.Entry(addEmp, bd =5)
         past.pack()
+        past.insert(0, self.employees[index].getPastExperience())
 
         exp = tk.Entry(addEmp, bd =5)
         exp.pack()
+        exp.insert(0, self.employees[index].getTimeInPos())
 
         contactInformation = tk.Entry(addEmp, bd =5)
         contactInformation.pack()
+        contactInformation.insert(0, self.employees[index].getContactInfo())
 
+        def updateHelper():
+            self.employees[index].setPassword(password.get())
+            self.employees[index].setFirstName(fName.get())
+            self.employees[index].setLastName(lName.get())
+            self.employees[index].setOccupation(occ.get())
+            self.employees[index].setLevel(lvl.get())
+            self.employees[index].setPastExperience(past.get())
+            self.employees[index].setTimeInPos(exp.get())
+            self.employees[index].setContactInfo(contactInformation.get())
+            self.showEmployees()
+            addEmp.destroy()
 
-        press = lambda self: self.addHelper(password.get(),
-        fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
-        add = tk.Button(addEmp, text="Update", bd=5, command=  lambda: press(self))
+        add = tk.Button(addEmp, text="Update", bd=5, command= updateHelper)
         add.pack()
         addEmp.mainloop()
+
+
 sys = system()
 #sys.load()
 root = tk.Tk()
