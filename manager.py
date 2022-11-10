@@ -1,24 +1,14 @@
-import tkinker as tk
+import tkinter as tk
 from tkinter import filedialog, Text
 import os
+from functools import partial
 
-
-
-root = tk.Tk()
-canvas = tk.Canvas(root, height=700, width =700, bg="white")
-canvas.pack()
-add = tk.button(root, text="Add Employee", padx=10,pady=5, bg="gray")
-sys = system()
-sys.load()
-sys.showEmployees()
-root.mainloop()
-sys.save()
 
 
 
 
 class employee:
-    def __init__(self, id, passW, first, last, occ, level, past, xp ,contact, note):
+    def __init__(self, id, passW, first, last, occ, level, past, xp ,contact):
         #self.id = id
         #self.password = pass
         #self.firstName = first
@@ -29,9 +19,8 @@ class employee:
         #self.timeInPos = xp
         #self.contactInfo: = contact
         #self.notes = [note] #double check
-        info = []
+        self.info = []
         notes = []
-        notes.append(note)
 
         self.info.append(id)
         self.info.append(passW)
@@ -64,9 +53,9 @@ class employee:
         self.info[8] = contact
 
     def show(self):
-        employeeTxt = self.info[0]
+        employeeTxt = str(self.info[0])
         for i in range(8):
-            employeeText = employeeTxt + ',' + self.info[i+1]
+            employeeText = employeeTxt + ',' + str(self.info[i+1])
         return employeeTxt
 
     def getID(self):
@@ -131,20 +120,27 @@ class employee:
 
 
 class system:
+
+    sysID = 10000000 # fix so no duplicate after reboot
+
     def __init__(self):
         self.searchBy = 0
         self.sortBy = 0
         self.employees = []
+        self.load()
 
     def load(self):
         if os.path.isfile('save.txt'):
             with open('save.txt') as save:
                 empList = save.read()
                 empList = empList.split(';')
-                for emp in empList:
-                    data = emp.split(',')
-                    newEmp = employee(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
-                    self.employees.append(newEmp)
+                #print(empList)
+                if len(empList) > 1:
+                    for emp in empList:
+                        data = emp.split(',')
+                        newEmp = employee(data[0], data[1], data[2], data[3], data[4],
+                            data[5], data[6], data[7], data[8], data[9])
+                        self.employees.append(newEmp)
 
     #def checkAccess(self):
 
@@ -153,9 +149,10 @@ class system:
     #def sort(): employee[]
 
     def save(self):
-        with open('save.txt', 'w') as save:
-            for employee in self.employees:
-                save.write(employee.show() + ';')
+        if len(self.employees) > 0:
+            with open('save.txt', 'w') as save:
+                for employee in self.employees:
+                    save.write(employee.show() + ';')
 
     def showEmployees(self):
         for employee in self.employees: #adapt to gui
@@ -171,9 +168,64 @@ class system:
             addNote.pack(side = RIGHT)
 
 
-    def addEmployee(self, employee):
-        employees.append(employee)
+    def addEmployee(self):
+        addEmp = tk.Tk()
+        addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
+        canvas.pack()
+        password = tk.Entry(addEmp, bd =5,)
+        password.pack()
+        passW = password.get()
+        fName = tk.Entry(addEmp, bd =5)
+        fName.pack()
+        first = fName.get()
+        lName = tk.Entry(addEmp, bd =5)
+        lName.pack()
+        last = lName.get()
+        occ = tk.Entry(addEmp, bd =5)
+        occ.pack()
+        occupation = occ.get()
+        lvl = tk.Entry(addEmp, bd =5)
+        lvl.pack()
+        level = lvl.get()
+        past = tk.Entry(addEmp, bd =5)
+        past.pack()
+        pastXP = past.get()
+        exp = tk.Entry(addEmp, bd =5)
+        exp.pack()
+        xp = exp.get()
+        contactInformation = tk.Entry(addEmp, bd =5)
+        contactInformation.pack()
+        contact = contactInformation.get()
+        add = tk.Button(addEmp, text="Add", bd=5, command= partial(self.addHelper, passW, "fName.get()", last, occupation,level, pastXP, xp ,contact))
+        add.pack()
+        addEmp.mainloop()
+
+    @classmethod
+    def incrementID(cls):
+        cls.sysID += 1
+
+    def addHelper(self, passW, first, last, occ,level, past, xp ,contact):
+        newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact)
+        self.employees.append(newEmployee)
+        print(newEmployee.show())
+        self.incrementID()
+
+
+
+        #employees.append(employee)
 
     #def removeEmployee(): void
 
     #def updateEmployee(): void
+sys = system()
+#sys.load()
+root = tk.Tk()
+canvas = tk.Canvas(root, height=700, width =700, bg="white")
+canvas.pack()
+add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
+add.pack()
+
+
+sys.showEmployees()
+root.mainloop()
+sys.save()
