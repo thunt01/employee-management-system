@@ -8,7 +8,7 @@ from functools import partial
 
 
 class employee:
-    def __init__(self, id, passW, first, last, occ, level, past, xp ,contact):
+    def __init__(self, id, passW, first, last, occ, level, past, xp ,contact, note):
         #self.id = id
         #self.password = pass
         #self.firstName = first
@@ -20,7 +20,7 @@ class employee:
         #self.contactInfo: = contact
         #self.notes = [note] #double check
         self.info = []
-        notes = []
+        notes = note
 
         self.info.append(id)
         self.info.append(passW)
@@ -53,9 +53,11 @@ class employee:
         self.info[8] = contact
 
     def show(self):
-        employeeTxt = str(self.info[0])
-        for i in range(8):
-            employeeText = employeeTxt + ',' + str(self.info[i+1])
+        #employeeID= str(self.info[0])
+        employeeTxt = ','.join(str(x) for x in self.info)
+        #for i in range(8):
+            #employeeText =+ ',' + str(self.info[i+1])
+            #print(employeeTxt)
         return employeeTxt
 
     def getID(self):
@@ -138,9 +140,10 @@ class system:
                 if len(empList) > 1:
                     for emp in empList:
                         data = emp.split(',')
-                        newEmp = employee(data[0], data[1], data[2], data[3], data[4],
-                            data[5], data[6], data[7], data[8], data[9])
-                        self.employees.append(newEmp)
+                        if len(data) == 10:
+                            newEmp = employee(data[0], data[1], data[2], data[3], data[4],
+                                data[5], data[6], data[7], data[8], data[9])
+                            self.employees.append(newEmp)
 
     #def checkAccess(self):
 
@@ -155,17 +158,20 @@ class system:
                     save.write(employee.show() + ';')
 
     def showEmployees(self):
+        for widget in canvas.winfo_children():
+            widget.destroy()
+
         for employee in self.employees: #adapt to gui
-            empframe = tk.Frame(root)
+            empframe = tk.Frame(canvas, borderwidth=10)
             empframe.pack()
-            L = Label(empframe, text= employee.show())
+            L = tk.Label(empframe, text= employee.show())
             L.pack()
-            delete = tk.button(root, text="Delete", padx=10,pady=5, bg="gray")
-            delete.pack(side = RIGHT)
-            update = tk.button(root, text="Update", padx=10,pady=5, bg="gray")
-            update.pack(side = RIGHT)
-            addNote = tk.button(root, text="Note", padx=10,pady=5, bg="gray")
-            addNote.pack(side = RIGHT)
+            delete = tk.Button(empframe, text="Delete", padx=10,pady=5, bg="gray")
+            delete.pack(side = "right")
+            update = tk.Button(empframe, text="Update", padx=10,pady=5, bg="gray")
+            update.pack(side = "right")
+            addNote = tk.Button(empframe, text="Note", padx=10,pady=5, bg="gray")
+            addNote.pack(side = "right")
 
 
     def addEmployee(self):
@@ -196,7 +202,11 @@ class system:
         contactInformation = tk.Entry(addEmp, bd =5)
         contactInformation.pack()
         contact = contactInformation.get()
-        add = tk.Button(addEmp, text="Add", bd=5, command= partial(self.addHelper, passW, "fName.get()", last, occupation,level, pastXP, xp ,contact))
+        #print(contact)
+        #press = partial(self.addHelper, passW, "fName.get()", last, occupation,level, pastXP, xp ,contact)
+        press = lambda self: self.addHelper(password.get(),
+        fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
+        add = tk.Button(addEmp, text="Add", bd=5, command=  lambda: press(self))
         add.pack()
         addEmp.mainloop()
 
@@ -204,15 +214,18 @@ class system:
     def incrementID(cls):
         cls.sysID += 1
 
-    def addHelper(self, passW, first, last, occ,level, past, xp ,contact):
-        newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact)
-        self.employees.append(newEmployee)
+    def addHelper( self, passW, first, last, occ,level, past, xp ,contact):
+        newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact, [])
+
         print(newEmployee.show())
+        print(passW)
+        print(last)
+        self.employees.append(newEmployee)
+
         self.incrementID()
+        self.showEmployees()
 
 
-
-        #employees.append(employee)
 
     #def removeEmployee(): void
 
