@@ -114,8 +114,8 @@ class employee:
         self.info[8] = contact
 
     def addNote(self,note):
-        #self.info[9].append(note)
-        print(type(self.info[9]))
+        self.info[9].append(note)
+        #print(type(self.info[9]))
 
 
 class system:
@@ -138,8 +138,10 @@ class system:
                     for emp in empList:
                         data = emp.split(',')
                         if len(data) == 10:
+                            noteString = data[9]
+                            notesStrip = noteString[1: len(noteString) -1]
                             newEmp = employee(data[0], data[1], data[2], data[3], data[4],
-                                data[5], data[6], data[7], data[8], list(data[9].split(',')))
+                                data[5], data[6], data[7], data[8], notesStrip.split(','))
                             self.employees.append(newEmp)
 
     #def checkAccess(self):
