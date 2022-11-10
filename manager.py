@@ -161,17 +161,29 @@ class system:
         for widget in canvas.winfo_children():
             widget.destroy()
 
-        for employee in self.employees: #adapt to gui
-            empframe = tk.Frame(canvas, borderwidth=10)
-            empframe.pack()
-            L = tk.Label(empframe, text= employee.show())
-            L.pack()
-            delete = tk.Button(empframe, text="Delete", padx=10,pady=5, bg="gray")
-            delete.pack(side = "right")
-            update = tk.Button(empframe, text="Update", padx=10,pady=5, bg="gray")
-            update.pack(side = "right")
-            addNote = tk.Button(empframe, text="Note", padx=10,pady=5, bg="gray")
-            addNote.pack(side = "right")
+        lbox = tk.Listbox(canvas, selectmode=tk.SINGLE)
+        lbox.pack()
+        for i in range(len(self.employees)): #adapt to gui
+            #empframe = tk.Frame(canvas, borderwidth=10)
+            #empframe.pack()
+            #L = tk.Label(empframe, text= emp.show())
+            #L.pack()
+            lbox.insert(i, self.employees[i].show())
+        empframe = tk.Frame(canvas, borderwidth=10)
+        empframe.pack()
+        delete = tk.Button(empframe, text="Delete", padx=10,pady=5, bg="gray",
+        command= lambda: self.removeEmployee(lbox.get()[0]))
+        delete.pack(side = "right")
+        update = tk.Button(empframe, text="Update", padx=10,pady=5, bg="gray")
+        update.pack(side = "right")
+        addNote = tk.Button(empframe, text="Add Note", padx=10,pady=5, bg="gray")
+        addNote.pack(side = "right")
+        print(lbox.curselection())
+        
+        if (len(lbox.curselection()) == 0):
+            delete['state'] = 'disabled'
+            update['state'] = 'disabled'
+            addNote['state'] = 'disabled'
 
 
     def addEmployee(self):
@@ -227,7 +239,9 @@ class system:
 
 
 
-    #def removeEmployee(): void
+    def removeEmployee(self,index):
+        self.employees.pop(index)
+        self.showEmployees()
 
     #def updateEmployee(): void
 sys = system()
