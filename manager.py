@@ -115,7 +115,6 @@ class employee:
 
     def addNote(self,note):
         self.info[9].append(note)
-        #print(type(self.info[9]))
 
 
 class system:
@@ -247,7 +246,6 @@ class system:
 
         self.incrementID()
         self.showEmployees()
-
 
 
     def removeEmployee(self,index):
