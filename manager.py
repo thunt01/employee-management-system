@@ -171,19 +171,23 @@ class system:
             lbox.insert(i, self.employees[i].show())
         empframe = tk.Frame(canvas, borderwidth=10)
         empframe.pack()
-        delete = tk.Button(empframe, text="Delete", padx=10,pady=5, bg="gray",
-        command= lambda: self.removeEmployee(lbox.get()[0]))
+        delete = tk.Button(empframe, text="Delete", state= 'disabled', padx=10,pady=5, bg="gray",
+        command= lambda: self.removeEmployee(lbox.curselection()[0]))
         delete.pack(side = "right")
-        update = tk.Button(empframe, text="Update", padx=10,pady=5, bg="gray")
+        update = tk.Button(empframe, text="Update",state= 'disabled', padx=10,pady=5, bg="gray",
+        command = lambda: self.updateEmployee(lbox.curselection()[0]))
         update.pack(side = "right")
-        addNote = tk.Button(empframe, text="Add Note", padx=10,pady=5, bg="gray")
+        addNote = tk.Button(empframe, text="Add Note",state= 'disabled', padx=10,pady=5, bg="gray",
+        command = lambda: self.updateEmployee(lbox.curselection()[0]))
         addNote.pack(side = "right")
-        print(lbox.curselection())
-        
-        if (len(lbox.curselection()) == 0):
-            delete['state'] = 'disabled'
-            update['state'] = 'disabled'
-            addNote['state'] = 'disabled'
+
+        def enable(self):
+            delete['state'] = 'normal'
+            update['state'] = 'normal'
+            addNote['state'] = 'normal'
+
+        lbox.bind('<<ListboxSelect>>', enable)
+
 
 
     def addEmployee(self):
@@ -243,7 +247,41 @@ class system:
         self.employees.pop(index)
         self.showEmployees()
 
-    #def updateEmployee(): void
+    def updateEmployee(self,index):
+        addEmp = tk.Tk()
+        addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
+        canvas.pack()
+        
+        password = tk.Entry(addEmp, bd =5,)
+        password.pack()
+
+        fName = tk.Entry(addEmp, bd =5)
+        fName.pack()
+
+        lName = tk.Entry(addEmp, bd =5)
+        lName.pack()
+
+        occ = tk.Entry(addEmp, bd =5)
+        occ.pack()
+
+        lvl = tk.Entry(addEmp, bd =5)
+        lvl.pack()
+
+        past = tk.Entry(addEmp, bd =5)
+        past.pack()
+
+        exp = tk.Entry(addEmp, bd =5)
+        exp.pack()
+
+        contactInformation = tk.Entry(addEmp, bd =5)
+        contactInformation.pack()
+
+
+        press = lambda self: self.addHelper(password.get(),
+        fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
+        add = tk.Button(addEmp, text="Update", bd=5, command=  lambda: press(self))
+        add.pack()
+        addEmp.mainloop()
 sys = system()
 #sys.load()
 root = tk.Tk()
