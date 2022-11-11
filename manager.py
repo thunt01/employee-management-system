@@ -116,7 +116,7 @@ class employee:
 
 class system:
 
-    sysID = 10000000 # fix so no duplicate after reboot #add
+    sysID = 10000000 # fix so no duplicate after reboot #a
 
     def __init__(self):
         self.searchBy = 0
