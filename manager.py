@@ -4,9 +4,6 @@ import os
 from functools import partial
 
 
-
-
-
 class employee:
     def __init__(self, id, passW, first, last, occ, level, past, xp ,contact, note):
         #self.id = id
@@ -52,7 +49,7 @@ class employee:
         self.info[7] = xp
         self.info[8] = contact
 
-    def show(self):
+    def show(self):#add
         employeeTxt = ','.join(str(x) for x in self.info)
         return employeeTxt
 
@@ -119,7 +116,7 @@ class employee:
 
 class system:
 
-    sysID = 10000000 # fix so no duplicate after reboot
+    sysID = 10000000 # fix so no duplicate after reboot #add
 
     def __init__(self):
         self.searchBy = 0
@@ -141,7 +138,7 @@ class system:
                             notesStrip = noteString[1: len(noteString) -1]
                             newEmp = employee(data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], notesStrip.split(','))
-                            self.employees.append(newEmp)
+                            self.employees.append(newEmp) #add
 
     #def checkAccess(self):
 
@@ -153,7 +150,7 @@ class system:
         if len(self.employees) > 0:
             with open('save.txt', 'w') as save:
                 for employee in self.employees:
-                    save.write(employee.show() + ';')
+                    save.write(employee.show() + ';') #add
 
     def showEmployees(self):
         for widget in canvas.winfo_children():
@@ -183,7 +180,7 @@ class system:
             addNote['state'] = 'normal'
         lbox.bind('<<ListboxSelect>>', enable)
 
-    def newNote(self, index):
+    def newNote(self, index): #add
         noteWindow = tk.Tk()
 
         noteToAdd = tk.Entry(noteWindow, bd =5,)
@@ -234,7 +231,7 @@ class system:
 
     @classmethod
     def incrementID(cls):
-        cls.sysID += 1
+        cls.sysID += 1 #add
 
     def addHelper( self, passW, first, last, occ,level, past, xp ,contact):
         newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact, [])
@@ -245,7 +242,7 @@ class system:
         self.employees.append(newEmployee)
 
         self.incrementID()
-        self.showEmployees()
+        self.showEmployees() #add
 
 
     def removeEmployee(self,index):
