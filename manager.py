@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import filedialog, Text
+from tkinter import filedialog, Text , ttk
 import os
-from functools import partial
 
 
 class employee:
@@ -50,8 +49,10 @@ class employee:
         self.info[8] = contact
 
     def show(self):#add
-        employeeTxt = ','.join(str(x) for x in self.info)
-        return employeeTxt
+        employeeTxt = ';;'.join(str(x) for x in self.info[0:9])
+        noteToString = ','.join(str(y) for y in self.info[9])
+        employeeTxt = employeeTxt + ';;'+ '[' + noteToString + ']'
+        return employeeTxt.replace("'", "")
 
     def getID(self):
         return self.info[0]
@@ -128,14 +129,16 @@ class system:
         if os.path.isfile('save.txt'):
             with open('save.txt') as save:
                 empList = save.read()
-                empList = empList.split(';')
+                empList = empList.split('<>')
                 #print(empList)
                 if len(empList) > 1:
                     for emp in empList:
-                        data = emp.split(',')
-                        if len(data) == 10:
+                        data = emp.split(';;')
+                        if len(data) > 9:
                             noteString = data[9]
                             notesStrip = noteString[1: len(noteString) -1]
+                            notesStrip = notesStrip.replace("'", "")
+                            print(notesStrip)
                             newEmp = employee(data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], notesStrip.split(','))
                             self.employees.append(newEmp) #add
@@ -150,19 +153,19 @@ class system:
         if len(self.employees) > 0:
             with open('save.txt', 'w') as save:
                 for employee in self.employees:
-                    save.write(employee.show() + ';') #add
+                    save.write(employee.show() + '<>') #add
 
     def showEmployees(self):
         for widget in canvas.winfo_children():
             widget.destroy()
 
-        lbox = tk.Listbox(canvas, selectmode=tk.SINGLE)
+        lbox = tk.Listbox(canvas, width = 100, selectmode=tk.SINGLE)
         lbox.pack()
 
         for i in range(len(self.employees)):
             lbox.insert(i, self.employees[i].show())
 
-        empframe = tk.Frame(canvas, borderwidth=10)
+        empframe = tk.Frame(canvas, width = 700)
         empframe.pack()
         delete = tk.Button(empframe, text="Delete", state= 'disabled', padx=10,pady=5, bg="gray",
         command= lambda: self.removeEmployee(lbox.curselection()[0]))
@@ -187,15 +190,15 @@ class system:
         noteToAdd.pack()
         def noteHelper():
             self.employees[index].addNote(noteToAdd.get())
-            self.showEmployees()
             noteWindow.destroy()
+            self.showEmployees()
         add = tk.Button(noteWindow, text="Save Note", bd=5, command= noteHelper)
         add.pack()
         noteWindow.mainloop()
 
     def addEmployee(self):
         addEmp = tk.Tk()
-        addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
+        #addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
         canvas.pack()
         password = tk.Entry(addEmp, bd =5,)
         password.pack()
@@ -221,11 +224,24 @@ class system:
         contactInformation = tk.Entry(addEmp, bd =5)
         contactInformation.pack()
         contact = contactInformation.get()
-        #print(contact)
-        #press = partial(self.addHelper, passW, "fName.get()", last, occupation,level, pastXP, xp ,contact)
-        press = lambda self: self.addHelper(password.get(),
-        fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
-        add = tk.Button(addEmp, text="Add", bd=5, command=  lambda: press(self))
+        def addHelper():
+            newEmployee = employee(system.sysID, password.get(),
+            fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get(), [])
+
+            print(newEmployee.show())
+            print(passW)
+            print(last)
+            self.employees.append(newEmployee)
+
+            self.incrementID()
+            addEmp.destroy()
+            self.showEmployees() #add
+
+        #press = lambda self: self.addHelper(password.get(),
+        #fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
+        #add = tk.Button(addEmp, text="Add", bd=5, command=  lambda: press(self))
+        add = tk.Button(addEmp, text="Add", bd=5, command= addHelper)
+
         add.pack()
         addEmp.mainloop()
 
@@ -233,16 +249,16 @@ class system:
     def incrementID(cls):
         cls.sysID += 1 #add
 
-    def addHelper( self, passW, first, last, occ,level, past, xp ,contact):
-        newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact, [])
+    #def addHelper( self, passW, first, last, occ,level, past, xp ,contact):
+    #    newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact, [])
 
-        print(newEmployee.show())
-        print(passW)
-        print(last)
-        self.employees.append(newEmployee)
+    #    print(newEmployee.show())
+    #    print(passW)
+        #print(last)
+        #self.employees.append(newEmployee)
 
-        self.incrementID()
-        self.showEmployees() #add
+        #self.incrementID()
+        #self.showEmployees() #add
 
 
     def removeEmployee(self,index):
@@ -306,8 +322,21 @@ class system:
 sys = system()
 #sys.load()
 root = tk.Tk()
+searchFrame = tk.Frame(root, borderwidth=10)
+searchFrame.pack()
 canvas = tk.Canvas(root, height=700, width =700, bg="white")
 canvas.pack()
+searchBar = tk.Entry(searchFrame, width = 15, bd =5)
+searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black")
+searchButton.pack(side ="right")
+searchBar.pack(side ="right")
+n = tk.StringVar()
+searchVar = ttk.Combobox(searchFrame, width = 5, textvariable = n)
+searchVar.pack(side ="left")
+
+searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+                        'Past Experience','Time in Role']
+
 add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
 add.pack()
 
