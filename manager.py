@@ -145,7 +145,15 @@ class system:
 
     #def checkAccess(self):
 
-    #def search(): employee[]
+    def search(self, by, criteria):
+        searchResults = []
+        if by == 0:
+            by = -1
+        for e in self.employees:
+            if e.info[by+1] == criteria:
+                searchResults.append(e)
+        self.showEmployees(searchResults)
+        #current tp searchResults
 
     #def sort(): employee[]
 
@@ -155,15 +163,15 @@ class system:
                 for employee in self.employees:
                     save.write(employee.show() + '<>') #add
 
-    def showEmployees(self):
+    def showEmployees(self, results):
         for widget in canvas.winfo_children():
             widget.destroy()
 
         lbox = tk.Listbox(canvas, width = 100, selectmode=tk.SINGLE)
         lbox.pack()
 
-        for i in range(len(self.employees)):
-            lbox.insert(i, self.employees[i].show())
+        for i in range(len(results)):
+            lbox.insert(i, results[i].show())
 
         empframe = tk.Frame(canvas, width = 700)
         empframe.pack()
@@ -191,7 +199,7 @@ class system:
         def noteHelper():
             self.employees[index].addNote(noteToAdd.get())
             noteWindow.destroy()
-            self.showEmployees()
+            self.showEmployees(self.employees)
         add = tk.Button(noteWindow, text="Save Note", bd=5, command= noteHelper)
         add.pack()
         noteWindow.mainloop()
@@ -235,7 +243,7 @@ class system:
 
             self.incrementID()
             addEmp.destroy()
-            self.showEmployees() #add
+            self.showEmployees(self.employees) #add
 
         #press = lambda self: self.addHelper(password.get(),
         #fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
@@ -247,28 +255,14 @@ class system:
 
     @classmethod
     def incrementID(cls):
-        cls.sysID += 1 #add
-
-    #def addHelper( self, passW, first, last, occ,level, past, xp ,contact):
-    #    newEmployee = employee(system.sysID, passW, first, last, occ,level, past, xp ,contact, [])
-
-    #    print(newEmployee.show())
-    #    print(passW)
-        #print(last)
-        #self.employees.append(newEmployee)
-
-        #self.incrementID()
-        #self.showEmployees() #add
-
+        cls.sysID += 1
 
     def removeEmployee(self,index):
         self.employees.pop(index)
-        self.showEmployees()
+        self.showEmployees(self.employees)
 
     def updateEmployee(self,index):
         addEmp = tk.Tk()
-        #addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
-        #Canvas.pack()
 
         password = tk.Entry(addEmp, bd =5,)
         password.pack()
@@ -311,7 +305,7 @@ class system:
             self.employees[index].setPastExperience(past.get())
             self.employees[index].setTimeInPos(exp.get())
             self.employees[index].setContactInfo(contactInformation.get())
-            self.showEmployees()
+            self.showEmployees(self.employees)
             addEmp.destroy()
 
         add = tk.Button(addEmp, text="Update", bd=5, command= updateHelper)
@@ -326,21 +320,28 @@ searchFrame = tk.Frame(root, borderwidth=10)
 searchFrame.pack()
 canvas = tk.Canvas(root, height=700, width =700, bg="white")
 canvas.pack()
+
 searchBar = tk.Entry(searchFrame, width = 15, bd =5)
-searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black")
+searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
+                command=lambda:sys.search(searchVar.current(), searchBar.get()))
 searchButton.pack(side ="right")
 searchBar.pack(side ="right")
 n = tk.StringVar()
-searchVar = ttk.Combobox(searchFrame, width = 5, textvariable = n)
+searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7, textvariable = n)
 searchVar.pack(side ="left")
-
 searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
                         'Past Experience','Time in Role']
+
+if searchVar.current() == -1:
+    searchBar['state'] = 'disabled'
+def searchAble(self):
+    searchBar['state'] = 'normal'
+searchVar.bind('<<ComboboxSelected>>', searchAble)
 
 add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
 add.pack()
 
 
-sys.showEmployees()
+sys.showEmployees(sys.employees)
 root.mainloop()
 sys.save()
