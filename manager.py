@@ -124,6 +124,7 @@ class system:
         self.sortBy = 0
         self.employees = []
         self.load()
+        self.currentEmployeeList = self.employees
 
     def load(self):
         if os.path.isfile('save.txt'):
@@ -152,10 +153,20 @@ class system:
         for e in self.employees:
             if e.info[by+1] == criteria:
                 searchResults.append(e)
+        self.currentEmployeeList = searchResults
         self.showEmployees(searchResults)
-        #current tp searchResults
 
-    #def sort(): employee[]
+    def sort(self, by):
+        if by == 7:
+            self.currentEmployeeList = self.employees
+        else:
+            if by == 0:
+                by = -1
+            def searchHelper(e):
+                print(e.info[by+1])
+                return e.info[by+1]
+            self.currentEmployeeList.sort(key=searchHelper)
+        self.showEmployees(self.currentEmployeeList)
 
     def save(self):
         if len(self.employees) > 0:
@@ -197,9 +208,9 @@ class system:
         noteToAdd = tk.Entry(noteWindow, bd =5,)
         noteToAdd.pack()
         def noteHelper():
-            self.employees[index].addNote(noteToAdd.get())
+            self.currentEmployeeList[index].addNote(noteToAdd.get())
             noteWindow.destroy()
-            self.showEmployees(self.employees)
+            self.showEmployees(self.currentEmployeeList)
         add = tk.Button(noteWindow, text="Save Note", bd=5, command= noteHelper)
         add.pack()
         noteWindow.mainloop()
@@ -258,53 +269,53 @@ class system:
         cls.sysID += 1
 
     def removeEmployee(self,index):
-        self.employees.pop(index)
-        self.showEmployees(self.employees)
+        self.employees.remove(self.currentEmployeeList.pop(index))
+        self.showEmployees(self.currentEmployeeList)
 
     def updateEmployee(self,index):
         addEmp = tk.Tk()
 
         password = tk.Entry(addEmp, bd =5,)
         password.pack()
-        password.insert(0, self.employees[index].getPassword())
+        password.insert(0, self.currentEmployeeList[index].getPassword())
 
         fName = tk.Entry(addEmp, bd =5)
         fName.pack()
-        fName.insert(0, self.employees[index].getFirstName())
+        fName.insert(0, self.currentEmployeeList[index].getFirstName())
 
         lName = tk.Entry(addEmp, bd =5)
         lName.pack()
-        lName.insert(0, self.employees[index].getLastName())
+        lName.insert(0, self.currentEmployeeList[index].getLastName())
 
         occ = tk.Entry(addEmp, bd =5)
         occ.pack()
-        occ.insert(0, self.employees[index].getOccupation())
+        occ.insert(0, self.currentEmployeeList[index].getOccupation())
 
         lvl = tk.Entry(addEmp, bd =5)
         lvl.pack()
-        lvl.insert(0, self.employees[index].getLevel())
+        lvl.insert(0, self.currentEmployeeList[index].getLevel())
 
         past = tk.Entry(addEmp, bd =5)
         past.pack()
-        past.insert(0, self.employees[index].getPastExperience())
+        past.insert(0, self.currentEmployeeList[index].getPastExperience())
 
         exp = tk.Entry(addEmp, bd =5)
         exp.pack()
-        exp.insert(0, self.employees[index].getTimeInPos())
+        exp.insert(0, self.currentEmployeeList[index].getTimeInPos())
 
         contactInformation = tk.Entry(addEmp, bd =5)
         contactInformation.pack()
-        contactInformation.insert(0, self.employees[index].getContactInfo())
+        contactInformation.insert(0, self.currentEmployeeList[index].getContactInfo())
 
         def updateHelper():
-            self.employees[index].setPassword(password.get())
-            self.employees[index].setFirstName(fName.get())
-            self.employees[index].setLastName(lName.get())
-            self.employees[index].setOccupation(occ.get())
-            self.employees[index].setLevel(lvl.get())
-            self.employees[index].setPastExperience(past.get())
-            self.employees[index].setTimeInPos(exp.get())
-            self.employees[index].setContactInfo(contactInformation.get())
+            self.currentEmployeeList[index].setPassword(password.get())
+            self.currentEmployeeList[index].setFirstName(fName.get())
+            self.currentEmployeeList[index].setLastName(lName.get())
+            self.currentEmployeeList[index].setOccupation(occ.get())
+            self.currentEmployeeList[index].setLevel(lvl.get())
+            self.currentEmployeeList[index].setPastExperience(past.get())
+            self.currentEmployeeList[index].setTimeInPos(exp.get())
+            self.currentEmployeeList[index].setContactInfo(contactInformation.get())
             self.showEmployees(self.employees)
             addEmp.destroy()
 
@@ -321,16 +332,28 @@ searchFrame.pack()
 canvas = tk.Canvas(root, height=700, width =700, bg="white")
 canvas.pack()
 
+sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
+sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+                        'Past Experience','Time in Role', 'Show All']
+sortVar.bind('<<ComboboxSelected>>', lambda x: sys.sort(sortVar.current()))
+sortVar.set("Sort")
+sortVar.pack(side ="right")
+
 searchBar = tk.Entry(searchFrame, width = 15, bd =5)
 searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
                 command=lambda:sys.search(searchVar.current(), searchBar.get()))
-searchButton.pack(side ="right")
-searchBar.pack(side ="right")
-n = tk.StringVar()
-searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7, textvariable = n)
+
+
+searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
 searchVar.pack(side ="left")
 searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
                         'Past Experience','Time in Role']
+searchVar.set("Search By")
+
+
+searchButton.pack(side ="right")
+searchBar.pack(side ="right")
+
 
 if searchVar.current() == -1:
     searchBar['state'] = 'disabled'
