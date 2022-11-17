@@ -1,1 +1,1 @@
-10000000;;Goat;;Leo;;Messi;;LW;;10;;5;;4;;@email;;[Very good dribbler,Short]<>10000001;;SUU;;Cristiano;;Ronaldo;;ST;;10;;4;;2;;cr7@hotmail.com;;[,Bad Attitude]<>10000003;;legoat;;Lebron;;James;;SF;;5;;3;;5;;#emial;;[]<>10000004
+10000000;;passw;;John;;Doe;;intern;;0;;0;;1;;jdoe@gmail.com;;[John is a hard worker]<>10000001;;password!;;Jane;;Doe;;Programmer;;1;;2;;3;;janedoe@hotmail.com;;[]<>10000003
