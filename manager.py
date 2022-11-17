@@ -125,6 +125,47 @@ class system:
         self.employees = []
         self.load()
         self.currentEmployeeList = self.employees
+        self.root = tk.Tk()
+        searchFrame = tk.Frame(self.root, borderwidth=10)
+        searchFrame.pack()
+        self.canvas = tk.Canvas(self.root, height=700, width =700, bg="white")
+        self.canvas.pack()
+
+        sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
+        sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+                                'Past Experience','Time in Role', 'Show All']
+        sortVar.bind('<<ComboboxSelected>>', lambda x: self.sort(sortVar.current()))
+        sortVar.set("Sort")
+        sortVar.pack(side ="right")
+
+        searchBar = tk.Entry(searchFrame, width = 15, bd =5)
+        searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
+                        command=lambda:self.search(searchVar.current(), searchBar.get()))
+
+
+        searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
+        searchVar.pack(side ="left")
+        searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+                                'Past Experience','Time in Role']
+        searchVar.set("Search By")
+
+
+        searchButton.pack(side ="right")
+        searchBar.pack(side ="right")
+
+
+        if searchVar.current() == -1:
+            searchBar['state'] = 'disabled'
+        def searchAble(self):
+            searchBar['state'] = 'normal'
+        searchVar.bind('<<ComboboxSelected>>', searchAble)
+
+        add = tk.Button(self.root, text="Add Employee", padx=10,pady=5, bg="black", command=self.addEmployee)
+        add.pack()
+
+        self.showEmployees(self.employees)
+        self.root.mainloop()
+        self.save()
 
     def load(self):
         if os.path.isfile('save.txt'):
@@ -150,9 +191,14 @@ class system:
         searchResults = []
         if by == 0:
             by = -1
-        for e in self.employees:
-            if e.info[by+1] == criteria:
-                searchResults.append(e)
+        if by > 3:
+            for e in self.employees:
+                if int(e.info[by+1]) > int(criteria)-1:
+                    searchResults.append(e)
+        else:
+            for e in self.employees:
+                if criteria in e.info[by+1]:
+                    searchResults.append(e)
         self.currentEmployeeList = searchResults
         self.showEmployees(searchResults)
 
@@ -175,16 +221,17 @@ class system:
                     save.write(employee.show() + '<>') #add
 
     def showEmployees(self, results):
-        for widget in canvas.winfo_children():
+
+        for widget in self.canvas.winfo_children():
             widget.destroy()
 
-        lbox = tk.Listbox(canvas, width = 100, selectmode=tk.SINGLE)
+        lbox = tk.Listbox(self.canvas, width = 100, selectmode=tk.SINGLE)
         lbox.pack()
 
         for i in range(len(results)):
             lbox.insert(i, results[i].show())
 
-        empframe = tk.Frame(canvas, width = 700)
+        empframe = tk.Frame(self.canvas, width = 700)
         empframe.pack()
         delete = tk.Button(empframe, text="Delete", state= 'disabled', padx=10,pady=5, bg="gray",
         command= lambda: self.removeEmployee(lbox.curselection()[0]))
@@ -218,49 +265,91 @@ class system:
     def addEmployee(self):
         addEmp = tk.Tk()
         #addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
-        canvas.pack()
-        password = tk.Entry(addEmp, bd =5,)
-        password.pack()
-        passW = password.get()
-        fName = tk.Entry(addEmp, bd =5)
-        fName.pack()
-        first = fName.get()
-        lName = tk.Entry(addEmp, bd =5)
-        lName.pack()
-        last = lName.get()
-        occ = tk.Entry(addEmp, bd =5)
-        occ.pack()
-        occupation = occ.get()
-        lvl = tk.Entry(addEmp, bd =5)
-        lvl.pack()
-        level = lvl.get()
-        past = tk.Entry(addEmp, bd =5)
-        past.pack()
-        pastXP = past.get()
-        exp = tk.Entry(addEmp, bd =5)
-        exp.pack()
-        xp = exp.get()
-        contactInformation = tk.Entry(addEmp, bd =5)
-        contactInformation.pack()
-        contact = contactInformation.get()
+        #self.canvas.pack()
+        passFrame = tk.Frame(addEmp, borderwidth=10)
+        passFrame.pack()
+        passLabel = ttk.Label(passFrame, text = ' Password: ')
+        passLabel.pack(side = 'left')
+        password = tk.Entry(passFrame, bd =5,)
+        password.pack(side = 'right')
+
+        fFrame = tk.Frame(addEmp, borderwidth=10)
+        fFrame.pack()
+        fLabel = ttk.Label(fFrame, text = ' First Name: ')
+        fLabel.pack(side = 'left')
+        fName = tk.Entry(fFrame, bd =5)
+        fName.pack(side = 'right')
+
+        lFrame = tk.Frame(addEmp, borderwidth=10)
+        lFrame.pack()
+        lLabel = ttk.Label(lFrame, text = 'Last Name:')
+        lLabel.pack(side = 'left')
+        lName = tk.Entry(lFrame, bd =5)
+        lName.pack(side = 'right')
+
+        occFrame = tk.Frame(addEmp, borderwidth=10)
+        occFrame.pack()
+        occLabel = ttk.Label(occFrame, text = 'Job Title:')
+        occLabel.pack(side = 'left')
+        occ = tk.Entry(occFrame, bd =5)
+        occ.pack(side = 'right')
+
+        lvlFrame = tk.Frame(addEmp, borderwidth=10)
+        lvlFrame.pack()
+        lvlLabel = ttk.Label(lvlFrame, text = 'Level:')
+        lvlLabel.pack(side = 'left')
+        lvl = tk.Entry(lvlFrame, bd =5)
+        lvl.pack(side = 'right')
+
+        pastFrame = tk.Frame(addEmp, borderwidth=10)
+        pastFrame.pack()
+        pastLabel = ttk.Label(pastFrame, text = 'Past Experience:')
+        pastLabel.pack(side = 'left')
+        past = tk.Entry(pastFrame, bd =5)
+        past.pack(side = 'right')
+
+        expFrame = tk.Frame(addEmp, borderwidth=10)
+        expFrame.pack()
+        expLabel = ttk.Label(expFrame, text = 'Time in Position:')
+        expLabel.pack(side = 'left')
+        exp = tk.Entry(expFrame, bd =5)
+        exp.pack(side = 'right')
+
+        conFrame = tk.Frame(addEmp, borderwidth=10)
+        conFrame.pack()
+        conLabel = ttk.Label(conFrame, text = 'Contact Info:')
+        conLabel.pack(side = 'left')
+        contactInformation = tk.Entry(conFrame, bd =5)
+        contactInformation.pack(side = 'right')
+
+        errorFrame = tk.Frame(addEmp, borderwidth=10)
+        errorFrame.pack()
+        errorLabel = tk.Label(errorFrame, text = '')
+        errorLabel.pack()
         def addHelper():
-            newEmployee = employee(system.sysID, password.get(),
-            fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get(), [])
 
-            print(newEmployee.show())
-            print(passW)
-            print(last)
-            self.employees.append(newEmployee)
+            try:
+                newEmployee = employee(system.sysID, str(password.get()), str(fName.get()),
+                    str(lName.get()), str(occ.get()), int(lvl.get()), int(past.get()),
+                    int(exp.get()), str(contactInformation.get()), [])
 
-            self.incrementID()
-            addEmp.destroy()
-            self.showEmployees(self.employees) #add
+                print(newEmployee.show())
 
-        #press = lambda self: self.addHelper(password.get(),
-        #fName.get(), lName.get(), occ.get(), lvl.get(), past.get(), exp.get(), contactInformation.get())
-        #add = tk.Button(addEmp, text="Add", bd=5, command=  lambda: press(self))
+                self.employees.append(newEmployee)
+                self.currentEmployeeList = self.employees
+
+                self.incrementID()
+                addEmp.destroy()
+                self.showEmployees(self.employees)
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+
+
+
+             #add
+
         add = tk.Button(addEmp, text="Add", bd=5, command= addHelper)
-
         add.pack()
         addEmp.mainloop()
 
@@ -269,8 +358,9 @@ class system:
         cls.sysID += 1
 
     def removeEmployee(self,index):
-        self.employees.remove(self.currentEmployeeList.pop(index))
-        self.showEmployees(self.currentEmployeeList)
+        self.employees.remove(self.currentEmployeeList[index])
+        #self.currentEmployeeList.pop(index)
+        self.showEmployees(self.employees)
 
     def updateEmployee(self,index):
         addEmp = tk.Tk()
@@ -325,46 +415,45 @@ class system:
 
 
 sys = system()
-#sys.load()
-root = tk.Tk()
-searchFrame = tk.Frame(root, borderwidth=10)
-searchFrame.pack()
-canvas = tk.Canvas(root, height=700, width =700, bg="white")
-canvas.pack()
-
-sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
-sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
-                        'Past Experience','Time in Role', 'Show All']
-sortVar.bind('<<ComboboxSelected>>', lambda x: sys.sort(sortVar.current()))
-sortVar.set("Sort")
-sortVar.pack(side ="right")
-
-searchBar = tk.Entry(searchFrame, width = 15, bd =5)
-searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
-                command=lambda:sys.search(searchVar.current(), searchBar.get()))
-
-
-searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
-searchVar.pack(side ="left")
-searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
-                        'Past Experience','Time in Role']
-searchVar.set("Search By")
-
-
-searchButton.pack(side ="right")
-searchBar.pack(side ="right")
-
-
-if searchVar.current() == -1:
-    searchBar['state'] = 'disabled'
-def searchAble(self):
-    searchBar['state'] = 'normal'
-searchVar.bind('<<ComboboxSelected>>', searchAble)
-
-add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
-add.pack()
-
-
-sys.showEmployees(sys.employees)
-root.mainloop()
-sys.save()
+# #sys.load()
+# root = tk.Tk()
+# searchFrame = tk.Frame(root, borderwidth=10)
+# searchFrame.pack()
+# canvas = tk.Canvas(root, height=700, width =700, bg="white")
+# canvas.pack()
+#
+# sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
+# sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+#                         'Past Experience','Time in Role', 'Show All']
+# sortVar.bind('<<ComboboxSelected>>', lambda x: sys.sort(sortVar.current()))
+# sortVar.set("Sort")
+# sortVar.pack(side ="right")
+#
+# searchBar = tk.Entry(searchFrame, width = 15, bd =5)
+# searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
+#                 command=lambda:sys.search(searchVar.current(), searchBar.get()))
+#
+#
+# searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
+# searchVar.pack(side ="left")
+# searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
+#                         'Past Experience','Time in Role']
+# searchVar.set("Search By")
+#
+#
+# searchButton.pack(side ="right")
+# searchBar.pack(side ="right")
+#
+#
+# if searchVar.current() == -1:
+#     searchBar['state'] = 'disabled'
+# def searchAble(self):
+#     searchBar['state'] = 'normal'
+# searchVar.bind('<<ComboboxSelected>>', searchAble)
+#
+# add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
+# add.pack()
+#
+# sys.showEmployees(sys.employees)
+# root.mainloop()
+# sys.save()
