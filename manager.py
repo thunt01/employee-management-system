@@ -535,7 +535,7 @@ class system:
         errorLabel.pack()
 
         def updateHelper():
-            print("hello")
+            #print("hello")
             valid = True
 
             try:
@@ -667,6 +667,6 @@ class Authentication:
 
 
 app = Authentication()
-print(app.auth)
+#print(app.auth)
 if (app.auth):
     sys = system()
