@@ -603,7 +603,7 @@ class Authentication:
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry('425x185+700+300')
-
+        self.attemptCount = 0
         self.auth = False
 
 
@@ -660,6 +660,11 @@ class Authentication:
 
             '''Prompt user that either id or password is wrong'''
             self.message['text'] = 'Username or Password incorrect. Try again!'
+
+            if self.attemptCount == 2:
+                self.root.destroy()
+            else:
+                self.attemptCount += 1
 
         else:
             '''Prompt user that either id or password is empty'''
