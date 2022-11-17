@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, Text , ttk
+from tkinter import *
 import os
+#from login import *
 
 
 class employee:
@@ -117,30 +119,33 @@ class employee:
 
 class system:
 
-    sysID = 10000000 # fix so no duplicate after reboot #a
+     #sysID = 10000000# fix so no duplicate after reboot #a
 
     def __init__(self):
-        self.searchBy = 0
-        self.sortBy = 0
+        #self.searchBy = 0
+        #self.sortBy = 0
+
+        self.sysID = 10000000
         self.employees = []
         self.load()
         self.currentEmployeeList = self.employees
         self.root = tk.Tk()
         searchFrame = tk.Frame(self.root, borderwidth=10)
         searchFrame.pack()
-        self.canvas = tk.Canvas(self.root, height=700, width =700, bg="white")
+        self.canvas = tk.Canvas(self.root, height=700, width =700 ) #, bg="black")
         self.canvas.pack()
 
         sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
         sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
                                 'Past Experience','Time in Role', 'Show All']
         sortVar.bind('<<ComboboxSelected>>', lambda x: self.sort(sortVar.current()))
+
         sortVar.set("Sort")
         sortVar.pack(side ="right")
 
         searchBar = tk.Entry(searchFrame, width = 15, bd =5)
         searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
-                        command=lambda:self.search(searchVar.current(), searchBar.get()))
+                        command=lambda: self.search(searchVar.current(), searchBar.get()))
 
 
         searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
@@ -160,32 +165,39 @@ class system:
             searchBar['state'] = 'normal'
         searchVar.bind('<<ComboboxSelected>>', searchAble)
 
-        add = tk.Button(self.root, text="Add Employee", padx=10,pady=5, bg="black", command=self.addEmployee)
+        add = tk.Button(self.root, text="Add Employee", padx=10,pady=5,bd = 5, bg="black", command=self.addEmployee)
         add.pack()
 
         self.showEmployees(self.employees)
         self.root.mainloop()
         self.save()
 
+
     def load(self):
         if os.path.isfile('save.txt'):
             with open('save.txt') as save:
-                empList = save.read()
-                empList = empList.split('<>')
+                txtList = save.read()
+                txtList = txtList.split('<>')
+
                 #print(empList)
-                if len(empList) > 1:
+                if len(txtList) > 1:
+                    self.sysID = int(txtList[len(txtList)-1])
+
+                    empList = txtList[0: len(txtList) - 1]
+
                     for emp in empList:
                         data = emp.split(';;')
                         if len(data) > 9:
                             noteString = data[9]
                             notesStrip = noteString[1: len(noteString) -1]
                             notesStrip = notesStrip.replace("'", "")
-                            print(notesStrip)
-                            newEmp = employee(data[0], data[1], data[2], data[3], data[4],
-                                data[5], data[6], data[7], data[8], notesStrip.split(','))
+                            #print(notesStrip)
+                            newEmp = employee(int(data[0]), str(data[1]), str(data[2]), str(data[3]), str(data[4]),
+                                int(data[5]), int(data[6]), int(data[7]), str(data[8]), notesStrip.split(','))
                             self.employees.append(newEmp) #add
 
     #def checkAccess(self):
+        #return self.log.auth
 
     def search(self, by, criteria):
         searchResults = []
@@ -197,7 +209,7 @@ class system:
                     searchResults.append(e)
         else:
             for e in self.employees:
-                if criteria in e.info[by+1]:
+                if criteria.lower() in e.info[by+1].lower():
                     searchResults.append(e)
         self.currentEmployeeList = searchResults
         self.showEmployees(searchResults)
@@ -208,10 +220,10 @@ class system:
         else:
             if by == 0:
                 by = -1
-            def searchHelper(e):
-                print(e.info[by+1])
+            def sortHelper(e):
+                #print(e.info[by+1])
                 return e.info[by+1]
-            self.currentEmployeeList.sort(key=searchHelper)
+            self.currentEmployeeList.sort(key=sortHelper)
         self.showEmployees(self.currentEmployeeList)
 
     def save(self):
@@ -219,17 +231,20 @@ class system:
             with open('save.txt', 'w') as save:
                 for employee in self.employees:
                     save.write(employee.show() + '<>') #add
+                save.write(str(self.sysID))
 
     def showEmployees(self, results):
 
         for widget in self.canvas.winfo_children():
             widget.destroy()
 
-        lbox = tk.Listbox(self.canvas, width = 100, selectmode=tk.SINGLE)
+        lbox = tk.Listbox(self.canvas, width = 35, bd=5, selectmode=tk.SINGLE)
         lbox.pack()
 
         for i in range(len(results)):
-            lbox.insert(i, results[i].show())
+            #lbox.insert(i, results[i].show())
+            lbox.insert(i, str(results[i].getID()) +": "+ results[i].getFirstName() + " "
+            + results[i].getLastName() + ", " + results[i].getOccupation())
 
         empframe = tk.Frame(self.canvas, width = 700)
         empframe.pack()
@@ -248,76 +263,128 @@ class system:
             update['state'] = 'normal'
             addNote['state'] = 'normal'
         lbox.bind('<<ListboxSelect>>', enable)
+        lbox.bind('<Double-Button-1>',  lambda x: self.viewEmployee(lbox.curselection()[0]))
+
+    def viewEmployee(self, index):
+        viewE = tk.Toplevel()
+        view = tk.Frame(viewE, bd=5)
+        view.pack()
+
+        eID = tk.Label(view, text = ' Employee: '+ str(self.currentEmployeeList[index].getID()),
+                                    font='Helvetica 18 bold')
+        eID.pack()
+
+        fName = tk.Label(view, text = ' First Name: '+ str(self.currentEmployeeList[index].getFirstName()))
+        fName.pack()
+
+        lName = tk.Label(view, text = ' Last Name: '+ str(self.currentEmployeeList[index].getLastName()))
+        lName.pack()
+
+        occ = tk.Label(view, text = ' Job Title: '+ str(self.currentEmployeeList[index].getOccupation()))
+        occ.pack()
+
+        lvl = tk.Label(view, text = ' Level: '+ str(self.currentEmployeeList[index].getLevel()))
+        lvl.pack()
+
+        past = tk.Label(view, text = ' Past Experience: '+ str(self.currentEmployeeList[index].getPastExperience()) + ' years')
+        past.pack()
+
+        exp = tk.Label(view, text = ' Time in Position: '+ str(self.currentEmployeeList[index].getTimeInPos()) + ' years')
+        exp.pack()
+
+        contactInformation = tk.Label(view, text = ' Contact Information: '+ str(self.currentEmployeeList[index].getContactInfo()))
+        contactInformation.pack()
+
+        employeeNotes = self.currentEmployeeList[index].getNotes()
+
+        noteLabel = tk.Label(view, text = 'Notes:')
+        noteLabel.pack()
+        i = 1
+        for n in employeeNotes:
+            if n.strip():
+                eNote = tk.Label(view, text = str(i) + '. ' + n)
+                i +=1
+                eNote.pack()
+        #notes
 
     def newNote(self, index): #add
-        noteWindow = tk.Tk()
+        noteWindow = tk.Toplevel()
 
         noteToAdd = tk.Entry(noteWindow, bd =5,)
         noteToAdd.pack()
+
+        errorLabel = tk.Label(noteWindow, text = '')
+        errorLabel.pack()
+
         def noteHelper():
-            self.currentEmployeeList[index].addNote(noteToAdd.get())
-            noteWindow.destroy()
-            self.showEmployees(self.currentEmployeeList)
-        add = tk.Button(noteWindow, text="Save Note", bd=5, command= noteHelper)
-        add.pack()
+            input = noteToAdd.get().strip()
+            if input:
+                self.currentEmployeeList[index].addNote(input)
+                noteWindow.destroy()
+                self.showEmployees(self.currentEmployeeList)
+            else:
+                errorLabel['text'] = 'Missing Data: Please Enter A Note'
+                errorLabel['fg'] = 'red'
+
+        addButton = tk.Button(noteWindow, text="Save Note", command= noteHelper)
+        addButton.pack()
         noteWindow.mainloop()
 
     def addEmployee(self):
-        addEmp = tk.Tk()
-        #addCanvas = tk.Canvas(addEmp, height=200, width =200, bg="white")
-        #self.canvas.pack()
+        addEmp = tk.Toplevel()
+
         passFrame = tk.Frame(addEmp, borderwidth=10)
         passFrame.pack()
-        passLabel = ttk.Label(passFrame, text = ' Password: ')
+        passLabel = tk.Label(passFrame, text = ' Password: ')
         passLabel.pack(side = 'left')
         password = tk.Entry(passFrame, bd =5,)
         password.pack(side = 'right')
 
         fFrame = tk.Frame(addEmp, borderwidth=10)
         fFrame.pack()
-        fLabel = ttk.Label(fFrame, text = ' First Name: ')
+        fLabel = tk.Label(fFrame, text = ' First Name: ')
         fLabel.pack(side = 'left')
         fName = tk.Entry(fFrame, bd =5)
         fName.pack(side = 'right')
 
         lFrame = tk.Frame(addEmp, borderwidth=10)
         lFrame.pack()
-        lLabel = ttk.Label(lFrame, text = 'Last Name:')
+        lLabel = tk.Label(lFrame, text = 'Last Name:')
         lLabel.pack(side = 'left')
         lName = tk.Entry(lFrame, bd =5)
         lName.pack(side = 'right')
 
         occFrame = tk.Frame(addEmp, borderwidth=10)
         occFrame.pack()
-        occLabel = ttk.Label(occFrame, text = 'Job Title:')
+        occLabel = tk.Label(occFrame, text = 'Job Title:')
         occLabel.pack(side = 'left')
         occ = tk.Entry(occFrame, bd =5)
         occ.pack(side = 'right')
 
         lvlFrame = tk.Frame(addEmp, borderwidth=10)
         lvlFrame.pack()
-        lvlLabel = ttk.Label(lvlFrame, text = 'Level:')
+        lvlLabel = tk.Label(lvlFrame, text = 'Level:')
         lvlLabel.pack(side = 'left')
         lvl = tk.Entry(lvlFrame, bd =5)
         lvl.pack(side = 'right')
 
         pastFrame = tk.Frame(addEmp, borderwidth=10)
         pastFrame.pack()
-        pastLabel = ttk.Label(pastFrame, text = 'Past Experience:')
+        pastLabel = tk.Label(pastFrame, text = 'Past Experience:')
         pastLabel.pack(side = 'left')
         past = tk.Entry(pastFrame, bd =5)
         past.pack(side = 'right')
 
         expFrame = tk.Frame(addEmp, borderwidth=10)
         expFrame.pack()
-        expLabel = ttk.Label(expFrame, text = 'Time in Position:')
+        expLabel = tk.Label(expFrame, text = 'Time in Position:')
         expLabel.pack(side = 'left')
         exp = tk.Entry(expFrame, bd =5)
         exp.pack(side = 'right')
 
         conFrame = tk.Frame(addEmp, borderwidth=10)
         conFrame.pack()
-        conLabel = ttk.Label(conFrame, text = 'Contact Info:')
+        conLabel = tk.Label(conFrame, text = 'Contact Info:')
         conLabel.pack(side = 'left')
         contactInformation = tk.Entry(conFrame, bd =5)
         contactInformation.pack(side = 'right')
@@ -327,24 +394,56 @@ class system:
         errorLabel = tk.Label(errorFrame, text = '')
         errorLabel.pack()
         def addHelper():
-
+            valid = True
             try:
-                newEmployee = employee(system.sysID, str(password.get()), str(fName.get()),
-                    str(lName.get()), str(occ.get()), int(lvl.get()), int(past.get()),
-                    int(exp.get()), str(contactInformation.get()), [])
-
-                print(newEmployee.show())
-
-                self.employees.append(newEmployee)
-                self.currentEmployeeList = self.employees
-
-                self.incrementID()
-                addEmp.destroy()
-                self.showEmployees(self.employees)
+                intLevel = int(lvl.get())
+                lvlLabel['fg'] = 'white'
             except ValueError:
                 errorLabel['text'] = 'Invalid Input: Please Enter A Number'
                 errorLabel['fg'] = 'red'
+                lvlLabel['fg'] = 'red'
+                valid = False
+            try:
+                intPast = int(past.get())
+                pastLabel['fg'] = 'white'
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+                pastLabel['fg'] = 'red'
+                valid = False
+            try:
+                intExp = int(exp.get())
+                expLabel['fg'] = 'white'
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+                expLabel['fg'] = 'red'
+                valid = False
+            passW = str(password.get().strip())
+            first = str(fName.get().strip())
+            last = str(lName.get().strip())
+            title = str(occ.get().strip())
+            cInfo = str(contactInformation.get().strip())
+            if passW and first and last and title and cInfo:
+                if valid:
+                    newEmployee = employee(self.sysID, passW, first,
+                        last, title, intLevel, intPast,
+                        intExp, cInfo, [])
 
+                    print(newEmployee.show())
+
+                    self.employees.append(newEmployee)
+                    self.currentEmployeeList = self.employees
+
+                    self.incrementID()
+                    addEmp.destroy()
+                    self.showEmployees(self.employees)
+            else:
+                errorLabel['text'] = 'Missing Data: Please Complete All Fields'
+                errorLabel['fg'] = 'red'
+                pastLabel['fg'] = 'white'
+                expLabel['fg'] = 'white'
+                lvlLabel['fg'] = 'white'
 
 
              #add
@@ -353,9 +452,9 @@ class system:
         add.pack()
         addEmp.mainloop()
 
-    @classmethod
-    def incrementID(cls):
-        cls.sysID += 1
+    #@classmethod
+    def incrementID(self):
+        self.sysID += 1
 
     def removeEmployee(self,index):
         self.employees.remove(self.currentEmployeeList[index])
@@ -363,97 +462,211 @@ class system:
         self.showEmployees(self.employees)
 
     def updateEmployee(self,index):
-        addEmp = tk.Tk()
+        addEmp = tk.Toplevel()
 
-        password = tk.Entry(addEmp, bd =5,)
-        password.pack()
+        passFrame = tk.Frame(addEmp, borderwidth=10)
+        passFrame.pack()
+        passLabel = tk.Label(passFrame, text = ' Password: ')
+        passLabel.pack(side = 'left')
+        password = tk.Entry(passFrame, bd =5,)
+        password.pack(side = 'right')
         password.insert(0, self.currentEmployeeList[index].getPassword())
 
-        fName = tk.Entry(addEmp, bd =5)
-        fName.pack()
+
+        fFrame = tk.Frame(addEmp, borderwidth=10)
+        fFrame.pack()
+        fLabel = tk.Label(fFrame, text = ' First Name: ')
+        fLabel.pack(side = 'left')
+        fName = tk.Entry(fFrame, bd =5)
+        fName.pack(side = 'right')
         fName.insert(0, self.currentEmployeeList[index].getFirstName())
 
-        lName = tk.Entry(addEmp, bd =5)
-        lName.pack()
+        lFrame = tk.Frame(addEmp, borderwidth=10)
+        lFrame.pack()
+        lLabel = tk.Label(lFrame, text = 'Last Name:')
+        lLabel.pack(side = 'left')
+        lName = tk.Entry(lFrame, bd =5)
+        lName.pack(side = 'right')
         lName.insert(0, self.currentEmployeeList[index].getLastName())
 
-        occ = tk.Entry(addEmp, bd =5)
-        occ.pack()
+        occFrame = tk.Frame(addEmp, borderwidth=10)
+        occFrame.pack()
+        occLabel = tk.Label(occFrame, text = 'Job Title:')
+        occLabel.pack(side = 'left')
+        occ = tk.Entry(occFrame, bd =5)
+        occ.pack(side = 'right')
         occ.insert(0, self.currentEmployeeList[index].getOccupation())
 
-        lvl = tk.Entry(addEmp, bd =5)
-        lvl.pack()
+        lvlFrame = tk.Frame(addEmp, borderwidth=10)
+        lvlFrame.pack()
+        lvlLabel = tk.Label(lvlFrame, text = 'Level:')
+        lvlLabel.pack(side = 'left')
+        lvl = tk.Entry(lvlFrame, bd =5)
+        lvl.pack(side = 'right')
         lvl.insert(0, self.currentEmployeeList[index].getLevel())
 
-        past = tk.Entry(addEmp, bd =5)
-        past.pack()
+        pastFrame = tk.Frame(addEmp, borderwidth=10)
+        pastFrame.pack()
+        pastLabel = tk.Label(pastFrame, text = 'Past Experience:')
+        pastLabel.pack(side = 'left')
+        past = tk.Entry(pastFrame, bd =5)
+        past.pack(side = 'right')
         past.insert(0, self.currentEmployeeList[index].getPastExperience())
 
-        exp = tk.Entry(addEmp, bd =5)
-        exp.pack()
+        expFrame = tk.Frame(addEmp, borderwidth=10)
+        expFrame.pack()
+        expLabel = tk.Label(expFrame, text = 'Time in Position:')
+        expLabel.pack(side = 'left')
+        exp = tk.Entry(expFrame, bd =5)
+        exp.pack(side = 'right')
         exp.insert(0, self.currentEmployeeList[index].getTimeInPos())
 
-        contactInformation = tk.Entry(addEmp, bd =5)
-        contactInformation.pack()
+        conFrame = tk.Frame(addEmp, borderwidth=10)
+        conFrame.pack()
+        conLabel = tk.Label(conFrame, text = 'Contact Info:')
+        conLabel.pack(side = 'left')
+        contactInformation = tk.Entry(conFrame, bd =5)
+        contactInformation.pack(side = 'right')
         contactInformation.insert(0, self.currentEmployeeList[index].getContactInfo())
 
+        errorFrame = tk.Frame(addEmp, borderwidth=10)
+        errorFrame.pack()
+        errorLabel = tk.Label(errorFrame, text = '')
+        errorLabel.pack()
+
         def updateHelper():
-            self.currentEmployeeList[index].setPassword(password.get())
-            self.currentEmployeeList[index].setFirstName(fName.get())
-            self.currentEmployeeList[index].setLastName(lName.get())
-            self.currentEmployeeList[index].setOccupation(occ.get())
-            self.currentEmployeeList[index].setLevel(lvl.get())
-            self.currentEmployeeList[index].setPastExperience(past.get())
-            self.currentEmployeeList[index].setTimeInPos(exp.get())
-            self.currentEmployeeList[index].setContactInfo(contactInformation.get())
-            self.showEmployees(self.employees)
-            addEmp.destroy()
+            print("hello")
+            valid = True
+
+            try:
+                intLevel = int(lvl.get())
+                lvlLabel['fg'] = 'white'
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+                lvlLabel['fg'] = 'red'
+                valid = False
+            try:
+                intPast = int(past.get())
+                pastLabel['fg'] = 'white'
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+                pastLabel['fg'] = 'red'
+                valid = False
+            try:
+                intExp = int(exp.get())
+                expLabel['fg'] = 'white'
+            except ValueError:
+                errorLabel['text'] = 'Invalid Input: Please Enter A Number'
+                errorLabel['fg'] = 'red'
+                expLabel['fg'] = 'red'
+                valid = False
+            passW = str(password.get().strip())
+            first = str(fName.get().strip())
+            last = str(lName.get().strip())
+            title = str(occ.get().strip())
+            cInfo = str(contactInformation.get().strip())
+            if passW and first and last and title and cInfo:
+                if valid:
+                    self.currentEmployeeList[index].setPassword(passW)
+                    self.currentEmployeeList[index].setFirstName(first)
+                    self.currentEmployeeList[index].setLastName(last)
+                    self.currentEmployeeList[index].setOccupation(title)
+                    self.currentEmployeeList[index].setLevel(intLevel)
+                    self.currentEmployeeList[index].setPastExperience(intPast)
+                    self.currentEmployeeList[index].setTimeInPos(intExp)
+                    self.currentEmployeeList[index].setContactInfo(cInfo)
+                    self.showEmployees(self.employees)
+                    addEmp.destroy()
+            else:
+                errorLabel['text'] = 'Missing Data: Please Complete All Fields'
+                errorLabel['fg'] = 'red'
+                pastLabel['fg'] = 'white'
+                expLabel['fg'] = 'white'
+                lvlLabel['fg'] = 'white'
 
         add = tk.Button(addEmp, text="Update", bd=5, command= updateHelper)
         add.pack()
         addEmp.mainloop()
 
+class Authentication:
 
-sys = system()
-# #sys.load()
-# root = tk.Tk()
-# searchFrame = tk.Frame(root, borderwidth=10)
-# searchFrame.pack()
-# canvas = tk.Canvas(root, height=700, width =700, bg="white")
-# canvas.pack()
-#
-# sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
-# sortVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
-#                         'Past Experience','Time in Role', 'Show All']
-# sortVar.bind('<<ComboboxSelected>>', lambda x: sys.sort(sortVar.current()))
-# sortVar.set("Sort")
-# sortVar.pack(side ="right")
-#
-# searchBar = tk.Entry(searchFrame, width = 15, bd =5)
-# searchButton = tk.Button(searchFrame, text="Search",width = 4, bg="black",
-#                 command=lambda:sys.search(searchVar.current(), searchBar.get()))
-#
-#
-# searchVar = ttk.Combobox(searchFrame, text="Search By", width = 7)
-# searchVar.pack(side ="left")
-# searchVar['values'] = ['ID', 'First Name', 'Last Name', 'Job Title', 'Level',
-#                         'Past Experience','Time in Role']
-# searchVar.set("Search By")
-#
-#
-# searchButton.pack(side ="right")
-# searchBar.pack(side ="right")
-#
-#
-# if searchVar.current() == -1:
-#     searchBar['state'] = 'disabled'
-# def searchAble(self):
-#     searchBar['state'] = 'normal'
-# searchVar.bind('<<ComboboxSelected>>', searchAble)
-#
-# add = tk.Button(root, text="Add Employee", padx=10,pady=5, bg="black", command=sys.addEmployee)
-# add.pack()
-#
-# sys.showEmployees(sys.employees)
-# root.mainloop()
-# sys.save()
+    #user = 'admin'
+    #passw = 'Johnson'
+
+    admins = {
+          "admin": "Johnson",
+          "ceo": "pass123",
+          "cto": "secure"
+          }
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.geometry('425x185+700+300')
+
+        self.auth = False
+
+
+        self.root.title('USER AUTHENTICATION')
+
+        '''Make Window 10X10'''
+
+        rows = 0
+        while rows<10:
+            self.root.rowconfigure(rows, weight=1)
+            self.root.columnconfigure(rows, weight=1)
+            rows+=1
+
+        '''Username and Password'''
+
+        frame = tk.LabelFrame(self.root, text='Login')
+        frame.grid(row = 1,column = 1,columnspan=10,rowspan=10)
+
+        tk.Label(frame, text = ' Username ').grid(row = 2, column = 1, sticky = W)
+        self.username = tk.Entry(frame)
+        self.username.grid(row = 2,column = 2)
+
+        tk.Label(frame, text = ' Password ').grid(row = 5, column = 1, sticky = W)
+        self.password = tk.Entry(frame, show='*')
+        self.password.grid(row = 5, column = 2)
+
+        # Button
+
+        tk.Button(frame, text = 'LOGIN',command = self.login_user).grid(row=7,column=2)
+
+        '''Message Display'''
+        self.message = Label(text = '',fg = 'Red')
+        self.message.grid(row=9,column=6)
+
+        self.root.mainloop()
+
+
+    def login_user(self):
+
+        '''Check username and password entered are correct'''
+
+        if self.username.get() in self.admins:
+            if self.admins[self.username.get()] == self.password.get():
+        #if self.username.get() == self.user and self.password.get() == self.passw:
+
+
+            #Destroy current window
+                self.auth = True
+                self.root.destroy()
+
+
+
+        elif self.username.get().strip() and self.password.get().strip():
+
+            '''Prompt user that either id or password is wrong'''
+            self.message['text'] = 'Username or Password incorrect. Try again!'
+
+        else:
+            '''Prompt user that either id or password is empty'''
+            self.message['text'] = 'Missing Username or Password. Complete All Fields!'
+
+
+app = Authentication()
+print(app.auth)
+if (app.auth):
+    sys = system()
