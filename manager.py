@@ -222,7 +222,8 @@ class system:
             #def sortHelper(e):
                 #return e.info[by+1]
             #self.currentEmployeeList.sort(key=sortHelper)
-            self.currentEmployeeList = self.mergeSort(self.currentEmployeeList, by+1)
+            if len(self.currentEmployeeList) > 0:
+                self.currentEmployeeList = self.mergeSort(self.currentEmployeeList, by+1)
         self.showEmployees(self.currentEmployeeList)
 
     def save(self):
@@ -231,6 +232,9 @@ class system:
                 for employee in self.employees:
                     save.write(employee.show() + '<>') #add
                 save.write(str(self.sysID))
+        else:
+            with open('save.txt', 'w') as save:
+                save.write('')
 
     def showEmployees(self, results):
 
