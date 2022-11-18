@@ -1,22 +1,13 @@
 import tkinter as tk
-from tkinter import filedialog, Text , ttk
+from tkinter import filedialog, Text , ttk, messagebox
 from tkinter import *
 import os
-#from login import *
 
 
 class employee:
+
     def __init__(self, id, passW, first, last, occ, level, past, xp ,contact, note):
-        #self.id = id
-        #self.password = pass
-        #self.firstName = first
-        #self.lastName = last
-        #self.occupation = occ
-        #self.level = level
-        #self.pastExperience = past
-        #self.timeInPos = xp
-        #self.contactInfo: = contact
-        #self.notes = [note] #double check
+
         self.info = []
         notes = note
 
@@ -31,16 +22,8 @@ class employee:
         self.info.append(contact)
         self.info.append(notes)
 
-        #add
     def updateAll(self, passW, first, last, occ, level, past, xp ,contact):
-        #self.password = pass
-        #self.firstName = first
-        #self.lastName = last
-        #self.occupation = occ
-        #self.level = level
-        #self.pastExperience = past
-        #self.timeInPos = xp
-        #self.contactInfo: = contact
+
         self.info[1] = passW
         self.info[2] = first
         self.info[3] = last
@@ -50,7 +33,7 @@ class employee:
         self.info[7] = xp
         self.info[8] = contact
 
-    def show(self):#add
+    def show(self):
         employeeTxt = ';;'.join(str(x) for x in self.info[0:9])
         noteToString = ','.join(str(y) for y in self.info[9])
         employeeTxt = employeeTxt + ';;'+ '[' + noteToString + ']'
@@ -116,15 +99,9 @@ class employee:
     def addNote(self,note):
         self.info[9].append(note)
 
-
 class system:
 
-     #sysID = 10000000# fix so no duplicate after reboot #a
-
     def __init__(self):
-        #self.searchBy = 0
-        #self.sortBy = 0
-
         self.sysID = 10000000
         self.employees = []
         self.load()
@@ -132,7 +109,7 @@ class system:
         self.root = tk.Tk()
         searchFrame = tk.Frame(self.root, borderwidth=10)
         searchFrame.pack()
-        self.canvas = tk.Canvas(self.root, height=700, width =700 ) #, bg="black")
+        self.canvas = tk.Canvas(self.root, height=700, width =700 )
         self.canvas.pack()
 
         sortVar = ttk.Combobox(searchFrame, text="Sort", width = 3)
@@ -172,6 +149,33 @@ class system:
         self.root.mainloop()
         self.save()
 
+    def mergeSort(self, arr, by):
+        length = len(arr)
+        if length == 1:
+            return arr
+        front = self.mergeSort(arr[:int(length/2)], by)
+        back = self.mergeSort(arr[int(length/2):], by)
+        frontLen = len(front)
+        backLen = len(back)
+        f = 0
+        b = 0
+        sorted = []
+        while (f < frontLen) and (b < backLen):
+            if front[f].info[by] < back[b].info[by]:
+                sorted.append(front[f])
+                f+=1
+            else:
+                sorted.append(back[b])
+                b+=1
+
+        while f < frontLen:
+            sorted.append(front[f])
+            f+=1
+
+        while b < backLen:
+            sorted.append(back[b])
+            b+=1
+        return sorted
 
     def load(self):
         if os.path.isfile('save.txt'):
@@ -179,7 +183,6 @@ class system:
                 txtList = save.read()
                 txtList = txtList.split('<>')
 
-                #print(empList)
                 if len(txtList) > 1:
                     self.sysID = int(txtList[len(txtList)-1])
 
@@ -191,13 +194,9 @@ class system:
                             noteString = data[9]
                             notesStrip = noteString[1: len(noteString) -1]
                             notesStrip = notesStrip.replace("'", "")
-                            #print(notesStrip)
                             newEmp = employee(int(data[0]), str(data[1]), str(data[2]), str(data[3]), str(data[4]),
                                 int(data[5]), int(data[6]), int(data[7]), str(data[8]), notesStrip.split(','))
-                            self.employees.append(newEmp) #add
-
-    #def checkAccess(self):
-        #return self.log.auth
+                            self.employees.append(newEmp)
 
     def search(self, by, criteria):
         searchResults = []
@@ -220,10 +219,10 @@ class system:
         else:
             if by == 0:
                 by = -1
-            def sortHelper(e):
-                #print(e.info[by+1])
-                return e.info[by+1]
-            self.currentEmployeeList.sort(key=sortHelper)
+            #def sortHelper(e):
+                #return e.info[by+1]
+            #self.currentEmployeeList.sort(key=sortHelper)
+            self.currentEmployeeList = self.mergeSort(self.currentEmployeeList, by+1)
         self.showEmployees(self.currentEmployeeList)
 
     def save(self):
@@ -242,7 +241,6 @@ class system:
         lbox.pack()
 
         for i in range(len(results)):
-            #lbox.insert(i, results[i].show())
             lbox.insert(i, str(results[i].getID()) +": "+ results[i].getFirstName() + " "
             + results[i].getLastName() + ", " + results[i].getOccupation())
 
@@ -305,9 +303,8 @@ class system:
                 eNote = tk.Label(view, text = str(i) + '. ' + n)
                 i +=1
                 eNote.pack()
-        #notes
 
-    def newNote(self, index): #add
+    def newNote(self, index):
         noteWindow = tk.Toplevel()
 
         noteToAdd = tk.Entry(noteWindow, bd =5,)
@@ -430,8 +427,6 @@ class system:
                         last, title, intLevel, intPast,
                         intExp, cInfo, [])
 
-                    print(newEmployee.show())
-
                     self.employees.append(newEmployee)
                     self.currentEmployeeList = self.employees
 
@@ -445,20 +440,15 @@ class system:
                 expLabel['fg'] = 'white'
                 lvlLabel['fg'] = 'white'
 
-
-             #add
-
         add = tk.Button(addEmp, text="Add", bd=5, command= addHelper)
         add.pack()
         addEmp.mainloop()
 
-    #@classmethod
     def incrementID(self):
         self.sysID += 1
 
     def removeEmployee(self,index):
         self.employees.remove(self.currentEmployeeList[index])
-        #self.currentEmployeeList.pop(index)
         self.showEmployees(self.employees)
 
     def updateEmployee(self,index):
@@ -535,7 +525,6 @@ class system:
         errorLabel.pack()
 
         def updateHelper():
-            #print("hello")
             valid = True
 
             try:
@@ -592,9 +581,6 @@ class system:
 
 class Authentication:
 
-    #user = 'admin'
-    #passw = 'Johnson'
-
     admins = {
           "admin": "Johnson",
           "ceo": "pass123",
@@ -603,7 +589,7 @@ class Authentication:
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry('425x185+700+300')
-        self.attemptCount = 0
+        self.attemptCount = 3
         self.auth = False
 
 
@@ -630,8 +616,6 @@ class Authentication:
         self.password = tk.Entry(frame, show='*')
         self.password.grid(row = 5, column = 2)
 
-        # Button
-
         tk.Button(frame, text = 'LOGIN',command = self.login_user).grid(row=7,column=2)
 
         '''Message Display'''
@@ -647,13 +631,20 @@ class Authentication:
 
         if self.username.get() in self.admins:
             if self.admins[self.username.get()] == self.password.get():
-        #if self.username.get() == self.user and self.password.get() == self.passw:
-
 
             #Destroy current window
                 self.auth = True
                 self.root.destroy()
+                messagebox.showerror('Error', 'Error: Max Attempts Exceed')
 
+            else:
+                self.message['text'] = 'Username or Password incorrect. Try again!'
+                if self.attemptCount == 1:
+                    self.root.destroy()
+                    messagebox.showerror('Error', 'Error: Max Attempts Exceed')
+
+                else:
+                    self.attemptCount -= 1
 
 
         elif self.username.get().strip() and self.password.get().strip():
@@ -661,10 +652,11 @@ class Authentication:
             '''Prompt user that either id or password is wrong'''
             self.message['text'] = 'Username or Password incorrect. Try again!'
 
-            if self.attemptCount == 2:
+            if self.attemptCount == 1:
                 self.root.destroy()
+                messagebox.showerror('Error', 'Error: Max Attempts Exceed')
             else:
-                self.attemptCount += 1
+                self.attemptCount -= 1
 
         else:
             '''Prompt user that either id or password is empty'''
@@ -672,6 +664,5 @@ class Authentication:
 
 
 app = Authentication()
-#print(app.auth)
 if (app.auth):
     sys = system()
