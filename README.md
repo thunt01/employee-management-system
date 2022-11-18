@@ -1,2 +1,6 @@
 # employee management system
- cd documents/csc3/project/employee-management-system
+admin logins (case sensitive)
+
+username: admin, password: Johnson
+username: ceo,   password: pass123
+username: cto,   password: secure
