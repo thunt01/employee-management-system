@@ -635,7 +635,6 @@ class Authentication:
             #Destroy current window
                 self.auth = True
                 self.root.destroy()
-                messagebox.showerror('Error', 'Error: Max Attempts Exceed')
 
             else:
                 self.message['text'] = 'Username or Password incorrect. Try again!'
